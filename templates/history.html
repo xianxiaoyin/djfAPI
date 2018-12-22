@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+	<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+	<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+	<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+	<title>果农帮新闻推荐系统</title>
+</head>
+
+
+<body >  <!--页面背景色-->
+
+
+
+
+	<div class="text-center" >
+        <img src="/static/img/news.png" alt="logo" id="image" class="text-center"/>
+		<ul id = "result" class="nav nav-tabs">
+			<li role="presentation" class="active" ><a href="{% url 'index' %}">首页</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'news' %}">农业新闻</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'shichangjiage' %}">市场价格</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'shiyongjishu' %}">实用技术</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'zhengcefagui' %}">政策法规</a></li>
+            <li role="presentation"><a href="{% url 'forum' %}">问答社区</a></li>
+			{% ifequal user_name None %}
+				<li class = "pull-right " role="presentation"> <a href="/login"> 登录 </a> </li>
+				<li class = "pull-right " role="presentation"> <a href="/register"> 注册 </a> </li>
+			{% else %}
+				<li role="presentation" class="active" ><a href="/history">历史浏览</a></li>
+				<li role="presentation"><a href="/myRecommend">我的推荐</a></li>
+				<li class = "pull-right " role="presentation"> <a href="/subLogout"> 登出 </a> </li>
+				<li class = "pull-right " role="presentation"> <a href="#"> {{ user_name  }} </a> </li>
+			{% endifequal %}
+		</ul>
+	</div>
+	<nav class="navbar navbar-default" role="navigation">
+	</nav>
+
+
+
+
+
+	
+	<div class="panel-group" id="accordion">
+		<div class="panel panel-default">
+			{% for news in news_list %}
+				<div class="panel-heading">
+					<h4 class="panel-title">
+						<a id ={{news.click_id}} data-toggle="collapse" data-parent="#accordion" 
+						   href={{news.href}}>
+							{{ news.news.title }}
+						</a>
+						<a class = "pull-right " data-toggle="collapse" data-parent="#accordion" >
+							{{ news.news.class_name }}
+						</a>
+					</h4>
+				</div>
+				<div id={{ news.content_id }} class="panel-collapse collapse">
+					<div class="panel-body">
+						{{ news.news.content }}
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+	</div>
+
+
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{% load staticfiles %}
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+	<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+	<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+	<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+	<title>果农帮新闻推荐系统</title>
+</head>
+
+
+<body >  <!--页面背景色-->
+
+
+	<div class="text-center" >
+        <img style="display: block;height: 100px;" src="{% static 'img/news.png' %}" alt="logo" id="image" class="text-center"/>
+		<ul id = "result" class="nav nav-tabs">
+			<li role="presentation" class="active" ><a href="{% url 'index' %}">首页</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'news' %}">农业新闻</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'shichangjiage' %}">市场价格</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'shiyongjishu' %}">实用技术</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'zhengcefagui' %}">政策法规</a></li>
+			<li role="presentation"><a href="{% url 'forum' %}">问答社区</a></li>
+			{% if request.user.is_authenticated %}
+				<li role="presentation"><a href="{% url 'user' 'history' %}">历史浏览</a></li>
+				<li role="presentation"><a href="/myRecommend">我的推荐</a></li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'logout' %}"> 登出 </a> </li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'user' "info" %}"> {{ request.user.username  }} </a> </li>
+
+			{% else %}
+				<li class = "pull-right " role="presentation"> <a href="{% url 'login' %}"> 登录 </a> </li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'register' %}"> 注册 </a> </li>
+			{% endif %}
+		</ul>
+	</div>
+<div>
+    <div style="width: 800px;height: 500px;border-right:1px solid red;border-bottom:1px solid red;overflow: hidden; margin-left: 100px;float: left">
+        <h3 style="text-align: center;">农业新闻</h3>
+        <ul >
+            {% for  new in news %}
+            <li><span style="float: right;padding-right: 5px;">时间：{{ new.updated_at | date:"Y-m-d"}}</span><a href="{% url 'detail' new.id %}">{{ new.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+	<div style="width: 800px;height: 500px;border-left:1px solid red;border-bottom:1px solid red;overflow: hidden; margin-left: 100px;float: left;">
+        <h3 style="text-align: center;">市场价格</h3>
+        <ul >
+            {% for  news in news1 %}
+            <li><span style="float: right;padding-right: 5px;">时间：{{ news.updated_at | date:"Y-m-d"}}</span><a href="{% url 'detail' news.id %}">{{ news.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div style="width: 800px;height: 500px;border-right:1px solid red;overflow: hidden; margin-left: 100px;float: left;">
+        <h3 style="text-align: center;">实用技术</h3>
+        <ul >
+            {% for  news in shiyongjishu %}
+            <li><span style="float: right;padding-right: 5px;">时间：{{ news.updated_at | date:"Y-m-d"}}</span><a href="{% url 'detail' news.id %}">{{ news.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div style="width: 800px;height: 500px;border-left:1px solid red;overflow: hidden; margin-left: 100px;float: left;">
+        <h3 style="text-align: center;">政策法规</h3>
+        <ul >
+            {% for  news in zhengcefagui %}
+            <li><span style="float: right;padding-right: 5px;">时间：{{ news.updated_at | date:"Y-m-d"}}</span><a href="{% url 'detail' news.id %}">{{ news.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div style="height: 50px;width: 100%;float: left; text-align: center;line-height: 50px;">
+        <span style="color: red;">底部占位······</span>
+    </div>
+</div>
+</body>
+</html>
+
+
+

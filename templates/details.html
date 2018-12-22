@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{% load staticfiles %}
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+	<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+	<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+	<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+	<title>果农帮新闻推荐系统</title>
+</head>
+
+
+<body >  <!--页面背景色-->
+
+
+	<div class="text-center" >
+        <img style="display: block;height: 100px;" src="{% static 'img/news.png' %}" alt="logo" id="image" class="text-center"/>
+		<ul id = "result" class="nav nav-tabs">
+			<li role="presentation" class="active" ><a href="{% url 'index' %}">首页</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'news' %}">农业新闻</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'shichangjiage' %}">市场价格</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'shiyongjishu' %}">实用技术</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'zhengcefagui' %}">政策法规</a></li>
+			{% if request.user.is_authenticated %}
+				<li role="presentation"><a href="{% url 'user' 'history' %}">历史浏览</a></li>
+				<li role="presentation"><a href="/myRecommend">我的推荐</a></li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'logout' %}"> 登出 </a> </li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'user' "info" %}"> {{ request.user.username  }} </a> </li>
+
+			{% else %}
+				<li class = "pull-right " role="presentation"> <a href="{% url 'login' %}"> 登录 </a> </li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'register' %}"> 注册 </a> </li>
+			{% endif %}
+		</ul>
+	</div>
+    <div class="bdsharebuttonbox" style="right: 20px;"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a></div>
+    <div style="width: 800px;margin: 10px auto;">
+        <h1 style="text-align: center">{{ news.title }}</h1>
+        <span style="float: right">{{ news.updated_at }}</span>
+        <br/>
+        <hr />
+        <p style="line-height: 30px;">{{ news.text }}</p>
+    </div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdPic":"","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</body>
+</html>
+
+
+

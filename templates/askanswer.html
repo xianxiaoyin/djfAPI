@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+{% load staticfiles %}
+<head>
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+	<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+	<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+	<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+	<title>问答社区</title>
+    <style>
+        .askans {
+            list-style-type: none;
+            line-height: 40px;
+        }
+        .askans a:hover {
+            color: red;
+            text-decoration: none;
+        }
+        .askans span {
+            float: right;
+            margin: 0 10px;
+        }
+        .searchform {
+            {#border: solid 1px red;#}
+            position: relative;
+            padding-top: 20px;
+            float: right;
+            padding-right: 100px;
+        }
+        #search {
+            border: #00a0f0 solid 1px;
+        }
+        .asktable {
+            width: 400px;
+            font-size: 22px;
+        }
+        .asktable2 {
+            width: 200px;
+            font-size: 22px;
+        }
+        .asktd {
+            line-height: 40px;
+            font-size: 22px;
+        }
+    </style>
+</head>
+
+
+<body >  <!--页面背景色-->
+	<div class="text-center" >
+        <img style="display: block;height: 100px;" src="{% static 'img/news.png' %}" alt="logo" id="image" class="text-center"/>
+		<ul id = "result" class="nav nav-tabs">
+			<li role="presentation" class="active" ><a href="{% url 'index' %}">首页</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'news' %}">农业新闻</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'shichangjiage' %}">市场价格</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'shiyongjishu' %}">实用技术</a></li>
+			<li role="presentation"><a href="{% url 'classfiy' 'zhengcefagui' %}">政策法规</a></li>
+			<li role="presentation"><a href="{% url 'forum' %}">问答社区</a></li>
+			{% if request.user.is_authenticated %}
+				<li role="presentation"><a href="{% url 'user' 'history' %}">历史浏览</a></li>
+				<li role="presentation"><a href="/myRecommend">我的推荐</a></li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'logout' %}"> 登出 </a> </li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'user' "info" %}"> {{ request.user.username  }} </a> </li>
+
+			{% else %}
+				<li class = "pull-right " role="presentation"> <a href="{% url 'login' %}"> 登录 </a> </li>
+				<li class = "pull-right " role="presentation"> <a href="{% url 'register' %}"> 注册 </a> </li>
+			{% endif %}
+		</ul>
+	</div>
+<div>
+    <div style="width: 80%;height:700px;margin: 0 auto;">
+        <form action="#" class="searchform">
+            <input type="text" id="search" value="">
+            <input type="submit" id="submit" value="搜索">
+        </form>
+        <a style="text-decoration: none;" href="{% url 'addforum' %}"><img src="{% static 'img/jiahao.jpg' %}" width="50px" height="50px">添加新的问答</a>
+        <h1 style="text-align: center;">问答社区</h1><br/>
+
+        <table style="width: 80%;">
+            <tr>
+                <th class="asktable">问题</th>
+                <th class="asktable2">类型</th>
+                <th class="asktable2">提问人</th>
+                <th class="asktable2">时间</th>
+            </tr>
+            {% for forum in forums %}
+            <tr>
+                <td class="asktd"><a href="">{{ forum.title }}</a></td>
+                <td class="asktd">{{ forum.get_type_display }}</td>
+                <td class="asktd">{{ forum.user_id }}</td>
+                <td class="asktd">{{ forum.updated_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div style="height: 50px;width: 100%;float: left; text-align: center;line-height: 50px;">
+        <span style="color: red;">底部占位······</span>
+    </div>
+</div>
+</body>
+</html>
+
+
+

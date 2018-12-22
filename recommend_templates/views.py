@@ -1,0 +1,375 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+import operator
+import math
+from .models import News, Forum, VerifyCode, UserFav, BrowserHistory, Leave
+from rest_framework import mixins, generics, viewsets, filters, permissions
+from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.authentication import TokenAuthentication
+from django_filters.rest_framework import DjangoFilterBackend
+from .serializer import NewsSerializer, ForumSerializer, SmsSerializer, \
+    UserRegSerializer, UserFavSerializer, UserDetailSerializer, UserFavDetailSerializer\
+    ,UserBrowserBhistorySerializer, LeaveCreateSerializer, LeaveListSerializer
+
+from .filters import NewsFilterSet, ForumFilterSet
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import ModelBackend
+from django.db.models import Q
+import random
+from rest_framework import status
+from utils.permissions import IsOwnerOrReadOnly
+from rest_framework_jwt.utils import jwt_encode_handler, jwt_payload_handler
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from utils.sendverificationcode import SendVerificationCode
+from utils.translate import Translate
+
+User = get_user_model()
+
+class CustomBackend(ModelBackend):
+    """
+    用户自定义类
+    """
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        try:
+            user = User.objects.get(Q(username=username)|Q(mobile=username))
+            if user.check_password(password):
+                return user
+        except Exception as e:
+            return None
+
+class SmsCodeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """
+    发送短信验证码
+    """
+
+    serializer_class = SmsSerializer
+
+    def get_code(self):
+        """
+        生成验证码
+        :return: 
+        """
+        seeds = "1234567890"
+        random_str = []
+        for i in range(4):
+            random_str.append(random.choice(seeds))
+
+        return "".join(random_str)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        code = self.get_code()
+        mobile = serializer.validated_data["mobile"]
+        vcode = VerifyCode(code=code, moblie=mobile)
+        scode = SendVerificationCode(mobile, code).send()
+        if scode:
+            vcode.save()
+            return Response({
+                "mobile": mobile
+            }, status.HTTP_201_CREATED)
+        else:
+            raise Exception('短信发送失败！')
+
+
+class UserViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,  mixins.DestroyModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    用户注册
+    """
+    # serializer_class = UserRegSerializer
+    queryset = User.objects.all()
+    # authentication_classes = (JSONWebTokenAuthentication, )
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = self.perform_create(serializer)
+        payload = jwt_payload_handler(user)
+        serializer.data["token"] = jwt_encode_handler(payload)
+        serializer.data["name"] = user.nick_name if user.nick_name else user.username
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+       return serializer.save()
+
+    def get_object(self):
+        return self.request.user
+
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return [permissions.IsAuthenticated()]
+        elif self.action == 'create':
+            return []
+        return []
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return UserDetailSerializer
+        elif self.action == 'create':
+            return UserRegSerializer
+        return UserDetailSerializer
+
+
+
+class PaginationSet(PageNumberPagination):
+    """
+    新闻分页类
+    """
+    page_size = 10
+    page_size_query_param = 'page_size'
+    page_query_param = 'page'
+    max_page_size = 100
+
+class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
+    """
+    list:
+    新闻列表
+    retrieve:
+    新闻详情
+    """
+    queryset = News.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        t = Translate()
+        try:
+            serializer.data['text'] = t.contents_split(serializer.data['text'])
+        except:
+            print(serializer.data['text'])
+        return Response(serializer.data)
+
+
+    serializer_class = NewsSerializer
+    pagination_class = PaginationSet
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
+    # 过滤
+    filter_fields = ('classify', 'exist')
+    # 自定义的过滤器
+    filterset_class = NewsFilterSet
+    # 搜素
+    search_fields = ('title', 'classify')
+    # 排序
+    ordering_fields = ('updated_at',)
+    # 默认排序
+    ordering = ('-updated_at')
+
+
+
+
+
+
+class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                     mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """
+    list:
+    帖子列表 
+    
+    retrieve:
+    帖子详情
+    
+    create:
+    添加帖子
+    
+    delete:
+    删除帖子
+    """
+    queryset = Forum.objects.all()
+    serializer_class = ForumSerializer
+    pagination_class = PaginationSet
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
+    filter_fields = ('type', 'exist')
+    filterset_class = ForumFilterSet
+    search_fields = ('title', 'type')
+    ordering_fields = ('updated_at',)
+    ordering = ('-updated_at')
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    # permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.IsAuthenticated()]
+        elif self.action == 'list':
+            return []
+        return []
+
+
+class UserFavViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                   mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """
+    list:
+    收藏列表 
+    
+    retrieve:
+    收藏详情
+    
+    create:
+    添加收藏
+    
+    delete:
+    删除收藏
+    """
+    # serializer_class = UserFavSerializer
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+
+
+    def get_queryset(self):
+        return UserFav.objects.filter(user_id=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return UserFavDetailSerializer
+        elif self.action == 'create':
+            return UserFavSerializer
+        return UserFavDetailSerializer
+
+class UserBrowserHistoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
+                                mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    list:
+    浏览历史列表 
+
+    retrieve:
+    浏览历史详情
+
+    create:
+    添加浏览历史
+    """
+    filter_backends = (filters.OrderingFilter,)
+    serializer_class = UserBrowserBhistorySerializer
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    ordering_fields = ('created_at',)
+    ordering = ('-created_at')
+    lookup_field = 'news_id'
+
+    def get_queryset(self):
+        return BrowserHistory.objects.filter(user_id=self.request.user)
+
+class UserForumViewSet( mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    list:
+    问答列表 
+
+    retrieve:
+    问答详情
+    """
+    filter_backends = (filters.OrderingFilter,)
+    serializer_class = ForumSerializer
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    ordering_fields = ('created_at',)
+    ordering = ('-created_at')
+
+    def get_queryset(self):
+        return Forum.objects.filter(user_id=self.request.user)
+
+class LeaveViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin ,viewsets.GenericViewSet):
+    """
+    list:
+    留言列表 
+
+    retrieve:
+    留言详情
+    
+    create：
+    添加留言
+    """
+    queryset = Leave.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            for i in serializer.data:
+                t = Translate()
+                i['content'] = t.run(i['content'])
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        for i in serializer.data:
+            t = Translate()
+            i['content'] = t.run(i['content'])
+        return Response(serializer.data)
+
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filter_fields = ('forum',)
+    # serializer_class = LeaveSerializer
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    ordering_fields = ('created_at',)
+    ordering = ('-created_at')
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return LeaveListSerializer
+        elif self.action == 'create':
+            return LeaveCreateSerializer
+        return LeaveListSerializer
+
+
+
+
+
+
+
+
+
+
+
+
+# 推荐算法
+class Tjsf(object):
+    def __init__(self, user):
+        self.user = user
+        self.news_id_list = [news.news_id for news in BrowserHistory.objects.filter(exist=True)]
+        self.all_list = {}
+        for i in self.news_id_list:
+            for j in BrowserHistory.objects.filter(exist=True, news_id=i):
+                if j.user_id_id in self.all_list.keys():
+                    self.all_list[j.user_id_id] += 1
+                else:
+                    self.all_list[j.user_id_id] = 1
+
+    def Jaccard(self, userA, userB):
+        fengmu = math.sqrt(userA * userB)
+        return 1 / fengmu
+
+# sorted(d.items(),key = operator.itemgetter(1))
+    def get_users(self):
+        xiangsidu = {}
+        print(self.all_list)
+        for k, v in self.all_list.items():
+            if k != self.user:
+                # xiangsidu['用户{}对于{}的相似度'.format(self.user, k)] = self.Jaccard(self.all_list[self.user], v)
+                xiangsidu['{},{}'.format(self.user, k)] = self.Jaccard(self.all_list[self.user], v)
+        # return xiangsidu
+        # print(sorted(xiangsidu.items(), key=operator.itemgetter(1), reverse=True))
+        # return sorted(xiangsidu.items(), key=operator.itemgetter(1), reverse=True)[:3]
+        return sorted(xiangsidu.keys(), key=operator.itemgetter(1), reverse=True)[:3]
+
+    def get_all_users(self):
+        userid = self.get_users()
+        userid_list = []
+        for i in userid:
+            userid_list.append(i.split(',')[1])
+        return userid_list
+
+    def get_all_article(self):
+        users = self.get_all_users()
+        articles =[]
+        now_use_article = []
+        for i in users:
+            for j in  BrowserHistory.objects.filter(user_id=i):
+                articles.append(j.news_id_id)
+
+        for a in BrowserHistory.objects.filter(user_id=self.user):
+            now_use_article.append(a.news_id_id)
+        print(now_use_article)
+        for b in now_use_article:
+            if b in articles:
+                articles.remove(b)
+            else:
+                articles.append(b)
+        return articles
