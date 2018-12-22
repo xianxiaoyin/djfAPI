@@ -22,6 +22,8 @@ class NewsSerializer(serializers.ModelSerializer):
     新闻类的序列化器
     """
     # user_id = UserProfileSerialize()
+    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    updated_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     class Meta:
         model = News
         fields = "__all__"
@@ -167,6 +169,7 @@ class UserBrowserBhistorySerializer(serializers.ModelSerializer):
     用户浏览历史序列化器
     """
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     # news = NewsSerializer()
     class Meta:
         model = BrowserHistory
@@ -193,6 +196,7 @@ class LeaveListSerializer(serializers.ModelSerializer):
     """
     Leave类的序列化器
     """
+    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     class Meta:
         model = Leave
         fields = '__all__'
