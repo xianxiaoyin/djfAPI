@@ -98,9 +98,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'news',
-        'HOST': '127.0.0.1',
+        'HOST': 'localhost',
         'USER': 'root',
-        'PASSWORD': 'love.1993',
+        'PASSWORD': '',
     }
 }
 
