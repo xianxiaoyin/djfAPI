@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import operator
 import math
-from .models import News, Forum, VerifyCode, UserFav, BrowserHistory, Leave
+from .models import News, Forum, VerifyCode, UserFav, BrowserHistory, Leave, Classify
 from rest_framework import mixins, generics, viewsets, filters, permissions
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -10,7 +10,7 @@ from rest_framework.authentication import TokenAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializer import NewsSerializer, ForumSerializer, SmsSerializer, \
     UserRegSerializer, UserFavSerializer, UserDetailSerializer, UserFavDetailSerializer\
-    ,UserBrowserBhistorySerializer, LeaveCreateSerializer, LeaveListSerializer
+    ,UserBrowserBhistorySerializer, LeaveCreateSerializer, LeaveListSerializer,ClassifySerializer
 
 from .filters import NewsFilterSet, ForumFilterSet
 from django.contrib.auth import get_user_model
@@ -121,6 +121,19 @@ class PaginationSet(PageNumberPagination):
     page_query_param = 'page'
     max_page_size = 100
 
+class ClassifySet(mixins.ListModelMixin,viewsets.GenericViewSet,mixins.RetrieveModelMixin):
+    """
+    list:
+    信息分类
+    
+    retrieve:
+    信息分类详情
+    """
+    queryset = Classify.objects.all()
+    serializer_class = ClassifySerializer
+
+
+
 class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
     """
     list:
@@ -130,14 +143,19 @@ class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
     """
     queryset = News.objects.all()
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        t = Translate()
-        try:
-            serializer.data['text'] = t.contents_split(serializer.data['text'])
-        except:
-            print(serializer.data['text'])
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            for i in serializer.data:
+                t = Translate()
+                i['title'] = t.runs(i['title'])
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        for i in serializer.data:
+            t = Translate()
+            i['title'] = t.runs(i['title'])
         return Response(serializer.data)
 
 

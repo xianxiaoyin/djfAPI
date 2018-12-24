@@ -1,7 +1,7 @@
 # coding:utf8
 
 from rest_framework import serializers
-from .models import News, UserProfile, Forum, Leave
+from .models import News, UserProfile, Forum, Leave, Classify
 from django.contrib.auth import get_user_model
 import re
 import datetime
@@ -16,6 +16,15 @@ class UserProfileSerialize(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('id',)
+
+class ClassifySerializer(serializers.ModelSerializer):
+    """
+    新闻类的序列化器
+    """
+    class Meta:
+        model = Classify
+        fields = '__all__'
+
 
 class NewsSerializer(serializers.ModelSerializer):
     """

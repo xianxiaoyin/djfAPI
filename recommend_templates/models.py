@@ -39,13 +39,27 @@ class VerifyCode(models.Model):
     def __str__(self):
         return self.code
 
+class Classify(models.Model):
+    """
+    分类
+    """
+    name = models.CharField(verbose_name='中文名', max_length=20)
+    desc = models.CharField(verbose_name='缩写', max_length=10)
+    created_at = models.DateTimeField(verbose_name=u'创建时间', auto_now_add=True, null=True)
+    class Meta:
+        verbose_name = u'分类'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
+
 class News(models.Model):
     """
     新闻
     """
     title = models.CharField(verbose_name=u'标题', max_length=50, unique=True)
     url = models.URLField(verbose_name=u'文章url链接', default='')
-    classify = models.CharField(verbose_name=u'分类', max_length=20)
+    classify = models.ForeignKey(Classify, verbose_name=u'分类')
     label = models.CharField(verbose_name=u'标签', max_length=20)
     text = models.TextField(verbose_name=u'内容')
     created_at = models.DateTimeField(verbose_name=u'创建时间', auto_now_add=True, null=True)
