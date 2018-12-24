@@ -171,7 +171,17 @@ class ForumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Forum
         fields = ('user','title','type','content','id')
+        # fields = "__all__"
 
+class ForumSerializer2(serializers.ModelSerializer):
+    """
+    Forum类的序列化器
+    """
+    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    updated_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    class Meta:
+        model = Forum
+        fields = "__all__"
 
 class UserBrowserBhistorySerializer(serializers.ModelSerializer):
     """

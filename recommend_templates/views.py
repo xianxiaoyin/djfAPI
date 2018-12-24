@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
-from .serializer import NewsSerializer, ForumSerializer, SmsSerializer, \
+from .serializer import NewsSerializer, ForumSerializer, ForumSerializer2, SmsSerializer, \
     UserRegSerializer, UserFavSerializer, UserDetailSerializer, UserFavDetailSerializer\
     ,UserBrowserBhistorySerializer, LeaveCreateSerializer, LeaveListSerializer,ClassifySerializer
 
@@ -146,22 +146,51 @@ class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
+        cfrom = self.request.query_params.get('cfrom', None)
+        to = self.request.query_params.get('to', None)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            for i in serializer.data:
-                t = Translate()
-                i['title'] = t.runs(i['title'])
-            return self.get_paginated_response(serializer.data)
+            if cfrom is not None and to is not None:
+                for i in serializer.data:
+                    t = Translate(cfrom, to)
+                    i['title'] = t.runs(i['title'])
+                    i['text'] = t.runs(i['text'])
+                return self.get_paginated_response(serializer.data)
+            else:
+                return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
-        for i in serializer.data:
-            t = Translate()
-            i['title'] = t.runs(i['title'])
-        return Response(serializer.data)
+        if cfrom is not None and to is not None:
+            for i in serializer.data:
+                t = Translate(cfrom, to)
+                i['title'] = t.runs(i['title'])
+                i['text'] = t.runs(i['text'])
+            return Response(serializer.data)
+        else:
+            return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        cfrom = self.request.query_params.get('cfrom', None)
+        to = self.request.query_params.get('to', None)
+        if cfrom is not None and to is not None:
+            try:
+                data = serializer.data
+                t = Translate(cfrom, to)
+                data['title'] = t.runs(data['title'])
+                data['text'] = t.runs(data['text'])
+                return Response(data)
+            except:
+                pass
+        else:
+            return Response(serializer.data)
 
 
     serializer_class = NewsSerializer
     pagination_class = PaginationSet
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
+
+
     # 过滤
     filter_fields = ('classify', 'exist')
     # 自定义的过滤器
@@ -172,6 +201,7 @@ class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
     ordering_fields = ('updated_at',)
     # 默认排序
     ordering = ('-updated_at')
+
 
 
 
@@ -194,6 +224,47 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     删除帖子
     """
     queryset = Forum.objects.all()
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        cfrom = self.request.query_params.get('cfrom', None)
+        to = self.request.query_params.get('to', None)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            if cfrom is not None and to is not None:
+                for i in serializer.data:
+                    t = Translate(cfrom, to)
+                    i['title'] = t.runs(i['title'])
+                    i['content'] = t.runs(i['content'])
+                return self.get_paginated_response(serializer.data)
+            else:
+                return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        if cfrom is not None and to is not None:
+            for i in serializer.data:
+                t = Translate(cfrom, to)
+                i['title'] = t.runs(i['title'])
+                i['content'] = t.runs(i['content'])
+            return Response(serializer.data)
+        else:
+            return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        cfrom = self.request.query_params.get('cfrom', None)
+        to = self.request.query_params.get('to', None)
+        if cfrom is not None and to is not None:
+            try:
+                data = serializer.data
+                t = Translate(cfrom, to)
+                data['title'] = t.runs(data['title'])
+                data['content'] = t.runs(data['content'])
+                return Response(data)
+            except:
+                pass
+        else:
+            return Response(serializer.data)
     serializer_class = ForumSerializer
     pagination_class = PaginationSet
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
@@ -209,8 +280,15 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
         if self.action == 'create':
             return [permissions.IsAuthenticated()]
         elif self.action == 'list':
-            return []
+            return [permissions.IsAuthenticated()]
         return []
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ForumSerializer2
+        elif self.action == 'create':
+            return ForumSerializer
+        return ForumSerializer2
 
 
 class UserFavViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -266,7 +344,7 @@ class UserBrowserHistoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     def get_queryset(self):
         return BrowserHistory.objects.filter(user_id=self.request.user)
 
-class UserForumViewSet( mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class UserForumViewSet( mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     list:
     问答列表 
@@ -274,9 +352,10 @@ class UserForumViewSet( mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
     retrieve:
     问答详情
     """
+
     filter_backends = (filters.OrderingFilter,)
     serializer_class = ForumSerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     ordering_fields = ('created_at',)
     ordering = ('-created_at')
@@ -300,17 +379,41 @@ class LeaveViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Crea
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
+        cfrom = self.request.query_params.get('cfrom', None)
+        to = self.request.query_params.get('to', None)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            for i in serializer.data:
-                t = Translate()
-                i['content'] = t.run(i['content'])
-            return self.get_paginated_response(serializer.data)
+            if cfrom is not None and to is not None:
+                for i in serializer.data:
+                    t = Translate(cfrom, to)
+                    i['content'] = t.runs(i['content'])
+                return self.get_paginated_response(serializer.data)
+            else:
+                return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
-        for i in serializer.data:
-            t = Translate()
-            i['content'] = t.run(i['content'])
-        return Response(serializer.data)
+        if cfrom is not None and to is not None:
+            for i in serializer.data:
+                t = Translate(cfrom, to)
+                i['content'] = t.runs(i['content'])
+            return Response(serializer.data)
+        else:
+            return Response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        cfrom = self.request.query_params.get('cfrom', None)
+        to = self.request.query_params.get('to', None)
+        if cfrom is not None and to is not None:
+            try:
+                data = serializer.data
+                t = Translate(cfrom, to)
+                data['content'] = t.runs(data['content'])
+                return Response(data)
+            except:
+                pass
+        else:
+            return Response(serializer.data)
 
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('forum',)
