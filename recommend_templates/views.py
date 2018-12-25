@@ -224,6 +224,18 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     删除帖子
     """
     queryset = Forum.objects.all()
+    def create(self, request, *args, **kwargs):
+            request.data._mutable = True
+            request.query_params._mutable = True
+            t = Translate('uy', 'zh')
+            request.data['title'] = t.runs(request.data['title']).replace('<br>','')
+            request.data['content'] = t.runs(request.data['content']).replace('<br>','')
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
@@ -375,6 +387,16 @@ class LeaveViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Crea
     添加留言
     """
     queryset = Leave.objects.all()
+    def create(self, request, *args, **kwargs):
+            request.data._mutable = True
+            request.query_params._mutable = True
+            t = Translate('uy', 'zh')
+            request.data['content'] = t.runs(request.data['content']).replace('<br>','')
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

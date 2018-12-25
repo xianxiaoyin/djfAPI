@@ -21,16 +21,18 @@ class ClassifySerializer(serializers.ModelSerializer):
     """
     新闻类的序列化器
     """
+    name = serializers.CharField()
     class Meta:
         model = Classify
-        fields = '__all__'
+        fields = ('id', 'name')
+        # fields = '__all__'
 
 
 class NewsSerializer(serializers.ModelSerializer):
     """
     新闻类的序列化器
     """
-    # user_id = UserProfileSerialize()
+    classify = ClassifySerializer()
     created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     updated_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     class Meta:
@@ -158,7 +160,24 @@ class UserFavDetailSerializer(serializers.ModelSerializer):
         model = UserFav
         fields = ("user", "news", "id")
 
+class LeaveCreateSerializer(serializers.ModelSerializer):
+    """
+    Leave类的序列化器
+    """
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    class Meta:
+        model = Leave
+        fields = "__all__"
 
+class LeaveListSerializer(serializers.ModelSerializer):
+    """
+    Leave类的序列化器
+    """
+    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    # forum = ForumSerializer2()
+    class Meta:
+        model = Leave
+        fields = ('id', 'content', 'created_at')
 
 class ForumSerializer(serializers.ModelSerializer):
     """
@@ -181,7 +200,8 @@ class ForumSerializer2(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     class Meta:
         model = Forum
-        fields = "__all__"
+        fields = ('user','title','id', 'updated_at', 'created_at')
+        # fields = "__all__"
 
 class UserBrowserBhistorySerializer(serializers.ModelSerializer):
     """
@@ -202,23 +222,7 @@ class UserBrowserBhistorySerializer(serializers.ModelSerializer):
         ]
 
 
-class LeaveCreateSerializer(serializers.ModelSerializer):
-    """
-    Leave类的序列化器
-    """
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    class Meta:
-        model = Leave
-        fields = "__all__"
 
-class LeaveListSerializer(serializers.ModelSerializer):
-    """
-    Leave类的序列化器
-    """
-    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
-    class Meta:
-        model = Leave
-        fields = '__all__'
 
 
 
