@@ -192,11 +192,9 @@ class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
 
 
     # 过滤
-    filter_fields = ('classify', 'exist')
-    # 自定义的过滤器
-    filterset_class = NewsFilterSet
+    filter_fields = ('classify',)
     # 搜素
-    search_fields = ('title', 'classify')
+    search_fields = ( 'title', 'text', 'label')
     # 排序
     ordering_fields = ('updated_at',)
     # 默认排序
