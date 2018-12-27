@@ -17,7 +17,7 @@ class WXLogin(object):
             'code': code,
             'grant_type': 'authorization_code'
         }
-        html = requests.get(url=self.userinfo_url, params=data)
+        html = requests.get(url=self.oauth2_url, params=data)
         print(html.status_code)
         print(html.text)
         if html.status_code == 200:
@@ -31,7 +31,7 @@ class WXLogin(object):
             'lang': 'zh-CN'
         }
 
-        html = requests.get(url=self.oauth2_url, params=data)
+        html = requests.get(url=self.userinfo_url, params=data)
         if html.status_code == 200:
             return html.json()
 
