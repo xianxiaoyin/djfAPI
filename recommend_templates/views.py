@@ -47,22 +47,19 @@ class SmsCodeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     def create(self, request, *args, **kwargs):
         request.data._mutable = True
         request.query_params._mutable = True
-        print(request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print(serializer.data['code'])
-        from utils.wxlogin import WXLogin
-        wx = WXLogin()
-        data = wx.get_token(serializer.data['code'])
-        # data = {
-        #     'access_token': 'access_token111111',
-        #     'openid': 'openid1111111',
-        #     'lang': 'zh-CN'
-        # }
-        a = serializer.data
-        a['token'] = data['access_token']
-        a['openid'] = data['openid']
-        print(a)
+
+        try:
+            from utils.wxlogin import WXLogin
+            wx = WXLogin()
+            data = wx.get_token(serializer.data['code'])
+            a = serializer.data
+            a['token'] = data['access_token']
+            a['openid'] = data['openid']
+        except Exception as e:
+            print(e)
+            a = {'msg', 'wx登陆失败！'}
         return Response(a, status=status.HTTP_201_CREATED)
 
 
