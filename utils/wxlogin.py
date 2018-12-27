@@ -8,7 +8,7 @@ class WXLogin(object):
         self.oauth2_url = 'https://api.weixin.qq.com/sns/oauth2/access_token'
         self.userinfo_url = 'https://api.weixin.qq.com/sns/userinfo'
         self.appid = 'wxfcb904527f9ed7cd'
-        self.secret = '8bfbf1a1ed2dc62b6f71517e55032f1b'
+        self.secret = '334c1da0b607550ca0d920cd77b47143'
 
     def get_token(self, code):
         data = {
