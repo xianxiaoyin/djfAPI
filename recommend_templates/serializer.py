@@ -46,28 +46,7 @@ class SmsSerializer(serializers.Serializer):
     """
     用户注册序列化类
     """
-    mobile = serializers.CharField(max_length=11)
-    def validate_mobile(self, mobile):
-        """
-        验证手机号
-        :param mobile: 
-        :return: 
-        """
-
-        # 验证手机号是否存在
-        if User.objects.filter(mobile=mobile).count():
-            raise serializers.ValidationError("手机号已注册！")
-
-        # 验证手机号是否合法
-        if not re.match(REGEX_MOBILE, mobile):
-            raise serializers.ValidationError("手机号非法！")
-
-        # 验证发送频率
-        one_mintes_ago = datetime.datetime.now() - timedelta(hours=0, minutes=1, seconds=0)
-        if VerifyCode.objects.filter(created_at__gt=one_mintes_ago, moblie=mobile).count():
-            raise serializers.ValidationError("距离上次发送验证码不足一分钟！")
-
-        return mobile
+    code = serializers.CharField()
 
 class UserRegSerializer(serializers.ModelSerializer):
     """

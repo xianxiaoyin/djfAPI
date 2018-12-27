@@ -44,33 +44,12 @@ class SmsCodeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
 
     serializer_class = SmsSerializer
-
-    def get_code(self):
-        """
-        生成验证码
-        :return: 
-        """
-        seeds = "1234567890"
-        random_str = []
-        for i in range(4):
-            random_str.append(random.choice(seeds))
-
-        return "".join(random_str)
-
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        code = self.get_code()
-        mobile = serializer.validated_data["mobile"]
-        vcode = VerifyCode(code=code, moblie=mobile)
-        scode = SendVerificationCode(mobile, code).send()
-        if scode:
-            vcode.save()
-            return Response({
-                "mobile": mobile
-            }, status.HTTP_201_CREATED)
-        else:
-            raise Exception('短信发送失败！')
+        code =self.request.query_params.get('code', None)
+        if code:
+            from utils.wxlogin import WXLogin
+            wx = WXLogin()
+            wx.get_token(code)
 
 
 class UserViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,  mixins.DestroyModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -116,7 +95,7 @@ class PaginationSet(PageNumberPagination):
     """
     新闻分页类
     """
-    page_size = 10
+    page_size = 5
     page_size_query_param = 'page_size'
     page_query_param = 'page'
     max_page_size = 100
@@ -154,7 +133,6 @@ class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
                 for i in serializer.data:
                     t = Translate(cfrom, to)
                     i['title'] = t.runs(i['title'])
-                    i['text'] = t.runs(i['text'])
                 return self.get_paginated_response(serializer.data)
             else:
                 return self.get_paginated_response(serializer.data)
@@ -163,7 +141,6 @@ class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
             for i in serializer.data:
                 t = Translate(cfrom, to)
                 i['title'] = t.runs(i['title'])
-                i['text'] = t.runs(i['text'])
             return Response(serializer.data)
         else:
             return Response(serializer.data)
@@ -245,7 +222,6 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
                 for i in serializer.data:
                     t = Translate(cfrom, to)
                     i['title'] = t.runs(i['title'])
-                    i['content'] = t.runs(i['content'])
                 return self.get_paginated_response(serializer.data)
             else:
                 return self.get_paginated_response(serializer.data)
@@ -254,7 +230,6 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
             for i in serializer.data:
                 t = Translate(cfrom, to)
                 i['title'] = t.runs(i['title'])
-                i['content'] = t.runs(i['content'])
             return Response(serializer.data)
         else:
             return Response(serializer.data)

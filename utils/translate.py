@@ -1,7 +1,7 @@
 # coding:utf8
 
 import requests
-import time
+
 '''
 将输入的中文翻译成维吾尔文
 '''
