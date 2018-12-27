@@ -10,7 +10,8 @@ from rest_framework.authentication import TokenAuthentication
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializer import NewsSerializer, ForumSerializer, ForumSerializer2, SmsSerializer, \
     UserRegSerializer, UserFavSerializer, UserDetailSerializer, UserFavDetailSerializer\
-    ,UserBrowserBhistorySerializer, LeaveCreateSerializer, LeaveListSerializer,ClassifySerializer
+    ,UserBrowserBhistorySerializer, LeaveCreateSerializer, LeaveListSerializer,ClassifySerializer,\
+    HotSerializer
 
 from .filters import NewsFilterSet, ForumFilterSet
 from django.contrib.auth import get_user_model
@@ -45,7 +46,7 @@ class SmsCodeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     serializer_class = SmsSerializer
     def create(self, request, *args, **kwargs):
-        request.data._mutable = True
+        # request.data._mutable = True
         request.query_params._mutable = True
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -438,37 +439,28 @@ class LeaveViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Crea
         return LeaveListSerializer
 
 
-
-
-
-
-
-
-
-
-
-
 # 推荐算法
 class Tjsf(object):
     def __init__(self, user):
         self.user = user
-        self.news_id_list = [news.news_id for news in BrowserHistory.objects.filter(exist=True)]
+        self.news_id_list = [news.news for news in BrowserHistory.objects.all()]
         self.all_list = {}
+        # 统计浏览历史中的用户有多少个浏览记录{userid: count}
         for i in self.news_id_list:
-            for j in BrowserHistory.objects.filter(exist=True, news_id=i):
-                if j.user_id_id in self.all_list.keys():
-                    self.all_list[j.user_id_id] += 1
+            for j in BrowserHistory.objects.filter(news_id=i):
+                if j.user_id in self.all_list.keys():
+                    self.all_list[j.user_id] += 1
                 else:
-                    self.all_list[j.user_id_id] = 1
-
+                    self.all_list[j.user_id] = 1
+    # 计算2个用户的相似度
     def Jaccard(self, userA, userB):
         fengmu = math.sqrt(userA * userB)
         return 1 / fengmu
 
 # sorted(d.items(),key = operator.itemgetter(1))
     def get_users(self):
+        # 获取用户相似度最高的三个用户的相似度值
         xiangsidu = {}
-        print(self.all_list)
         for k, v in self.all_list.items():
             if k != self.user:
                 # xiangsidu['用户{}对于{}的相似度'.format(self.user, k)] = self.Jaccard(self.all_list[self.user], v)
@@ -476,9 +468,10 @@ class Tjsf(object):
         # return xiangsidu
         # print(sorted(xiangsidu.items(), key=operator.itemgetter(1), reverse=True))
         # return sorted(xiangsidu.items(), key=operator.itemgetter(1), reverse=True)[:3]
-        return sorted(xiangsidu.keys(), key=operator.itemgetter(1), reverse=True)[:3]
+        return sorted(xiangsidu.keys(), key=operator.itemgetter(1), reverse=True)[:5]
 
     def get_all_users(self):
+        # 根据上面的相似度值获取对应的用户id
         userid = self.get_users()
         userid_list = []
         for i in userid:
@@ -486,19 +479,37 @@ class Tjsf(object):
         return userid_list
 
     def get_all_article(self):
+        # 获取三个用户的所有浏览历史文章，排除当前用户已经浏览过的文章
         users = self.get_all_users()
         articles =[]
         now_use_article = []
         for i in users:
-            for j in  BrowserHistory.objects.filter(user_id=i):
-                articles.append(j.news_id_id)
+            for j in BrowserHistory.objects.filter(user_id=i):
+                articles.append(j.news_id)
 
         for a in BrowserHistory.objects.filter(user_id=self.user):
-            now_use_article.append(a.news_id_id)
-        print(now_use_article)
+            now_use_article.append(a.news_id)
         for b in now_use_article:
             if b in articles:
                 articles.remove(b)
             else:
                 articles.append(b)
-        return articles
+        return articles[:5]
+
+
+
+class HotViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    list:
+    留言列表 
+    """
+    queryset = VerifyCode.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        t = Tjsf(2)
+        a = {}
+        for i in t.get_all_article():
+            a[i] = News.objects.get(id=i).title
+        return Response(a)
+
+    serializer_class = HotSerializer

@@ -57,13 +57,6 @@ class UserRegSerializer(serializers.ModelSerializer):
     """
     用户注册序列化类
     """
-    code = serializers.CharField(required=True, max_length=6, min_length=4, write_only=True,
-                                 error_messages={
-                                     "required": "验证码不能为空！",
-                                     "blank": "验证码不能为空！",
-                                     "max_length": "验证码格式错误！",
-                                     "min_length": "验证码格式错误！",
-                                 })
     username = serializers.CharField( read_only=True,
                                      allow_blank=False,
                                     validators=[UniqueValidator(queryset=User.objects.all(),
@@ -71,35 +64,23 @@ class UserRegSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True,
         style={'input_type': 'password'}
     )
-    def validate_code(self, code):
-        mobile = self.initial_data["mobile"]
-        vcode = VerifyCode.objects.filter(moblie=mobile).order_by("-created_at")
-        if vcode:
-            five_mintes_ago = datetime.datetime.now() - timedelta(hours=0, minutes=5, seconds=0)
-            last_code = vcode[0]
-            if last_code.created_at < five_mintes_ago:
-                raise serializers.ValidationError("验证码过期！")
-            if last_code.code != code:
-                raise serializers.ValidationError("验证码不匹配！")
-            return code
-        else:
-            raise serializers.ValidationError("未知的验证码！")
+
 
     # def validate_password(self, password):
     #     from django.contrib.auth.hashers import make_password
     #     password = self.initial_data["password"]
+    #     print(password)
     #     return make_password(password)
 
 
 
     def validate(self, attrs):
         attrs["username"] = attrs["mobile"]
-        del attrs["code"]
         return attrs
 
     class Meta:
         model = User
-        fields = ('username','mobile','code', 'password')
+        fields = ('username','mobile', 'password')
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -207,6 +188,14 @@ class UserBrowserBhistorySerializer(serializers.ModelSerializer):
 
 
 
+class HotSerializer(serializers.ModelSerializer):
+    """
+    Hot类的序列化器
+    """
+    code = serializers.CharField()
+    class Meta:
+        model = VerifyCode
+        fields= ('code',)
 
 
 

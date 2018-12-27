@@ -20,7 +20,7 @@ from AgriculturalRecommendation.settings import MEDIA_ROOT
 from django.views.static import serve
 from recommend_templates.views import NewsViewSet, ForumViewSet, SmsCodeViewSet, \
     UserViewSet, UserFavViewSet, UserBrowserHistoryViewSet, UserForumViewSet, LeaveViewSet, \
-    ClassifySet
+    ClassifySet,HotViewSet
 from rest_framework.documentation import include_docs_urls
 from rest_framework.routers import DefaultRouter
 from rest_framework_jwt.views import obtain_jwt_token
@@ -35,6 +35,7 @@ router.register(r'userfavs', UserFavViewSet, base_name='userfavs')
 router.register(r'userforums', UserForumViewSet, base_name='userforum')
 router.register(r'browserhistory', UserBrowserHistoryViewSet, base_name='browserhistory')
 router.register(r'classfiy', ClassifySet, base_name='classfiy')
+router.register(r'hot', HotViewSet, base_name='hot')
 
 
 urlpatterns = [
