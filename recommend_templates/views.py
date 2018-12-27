@@ -40,16 +40,32 @@ class CustomBackend(ModelBackend):
 
 class SmsCodeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
-    发送短信验证码
+    wx登陆
     """
 
     serializer_class = SmsSerializer
     def create(self, request, *args, **kwargs):
-        code =self.request.query_params.get('code', None)
-        if code:
-            from utils.wxlogin import WXLogin
-            wx = WXLogin()
-            wx.get_token(code)
+        request.data._mutable = True
+        request.query_params._mutable = True
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        print(serializer.data['code'])
+        from utils.wxlogin import WXLogin
+        wx = WXLogin()
+        data = wx.get_token(serializer.data['code'])
+        # data = {
+        #     'access_token': 'access_token111111',
+        #     'openid': 'openid1111111',
+        #     'lang': 'zh-CN'
+        # }
+        a = serializer.data
+        a['token'] = data['access_token']
+        a['openid'] = data['openid']
+        print(a)
+        return Response(a, status=status.HTTP_201_CREATED)
+
+
 
 
 class UserViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,  mixins.DestroyModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

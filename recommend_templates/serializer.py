@@ -47,6 +47,11 @@ class SmsSerializer(serializers.Serializer):
     用户注册序列化类
     """
     code = serializers.CharField()
+    token = serializers.CharField(read_only=True)
+    openid = serializers.CharField(read_only=True)
+    # class Meta:
+    #     model = VerifyCode
+    #     fields = ('code',)
 
 class UserRegSerializer(serializers.ModelSerializer):
     """
