@@ -162,11 +162,14 @@ class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
+        data = serializer.data
+        new = News.objects.get(id=data['id'])
+        new.page_view += 1
+        new.save()
         cfrom = self.request.query_params.get('cfrom', None)
         to = self.request.query_params.get('to', None)
         if cfrom is not None and to is not None:
             try:
-                data = serializer.data
                 t = Translate(cfrom, to)
                 data['title'] = t.runs(data['title'])
                 data['text'] = t.runs(data['text'])
@@ -174,7 +177,7 @@ class NewsViewSet( generics.ListAPIView, viewsets.ReadOnlyModelViewSet):
             except:
                 pass
         else:
-            return Response(serializer.data)
+            return Response(data)
 
 
     serializer_class = NewsSerializer
@@ -494,7 +497,10 @@ class Tjsf(object):
                 articles.remove(b)
             else:
                 articles.append(b)
-        return articles[:5]
+        if articles:
+            return articles[:5]
+        else:
+           return [i.id for i in News.objects.all().order_by('-page_view')[:5]]
 
 
 

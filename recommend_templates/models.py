@@ -62,6 +62,7 @@ class News(models.Model):
     classify = models.ForeignKey(Classify, verbose_name=u'分类')
     label = models.CharField(verbose_name=u'标签', max_length=20)
     text = models.TextField(verbose_name=u'内容')
+    page_view = models.IntegerField(verbose_name=u'浏览次数', default=0)
     created_at = models.DateTimeField(verbose_name=u'创建时间', auto_now_add=True, null=True)
     updated_at = models.DateTimeField(verbose_name=u'更新时间', auto_now=True)
     exist = models.BooleanField(verbose_name=u'状态', default=True)
