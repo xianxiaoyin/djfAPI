@@ -513,9 +513,11 @@ class HotViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         t = Tjsf(2)
-        a = {}
+        b = []
         for i in t.get_all_article():
+            a = {}
             a[i] = News.objects.get(id=i).title
-        return Response(a)
+            b.append(a)
+        return Response({'hot': b})
 
     serializer_class = HotSerializer
