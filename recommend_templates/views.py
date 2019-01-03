@@ -516,7 +516,8 @@ class HotViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         b = []
         for i in t.get_all_article():
             a = {}
-            a[i] = News.objects.get(id=i).title
+            a['id'] = i
+            a['title'] = News.objects.get(id=i).title
             b.append(a)
         return Response({'hot': b})
 
