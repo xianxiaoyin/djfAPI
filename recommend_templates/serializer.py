@@ -172,6 +172,19 @@ class UserBrowserBhistorySerializer(serializers.ModelSerializer):
     """
     用户浏览历史序列化器
     """
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    news = NewsSerializer()
+    class Meta:
+        model = BrowserHistory
+        fields = ('user', 'news', 'created_at')
+
+class UserBrowserBhistorySerializer1(serializers.ModelSerializer):
+    """
+    用户浏览历史序列化器
+    """
+
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     # news = NewsSerializer()
@@ -185,7 +198,6 @@ class UserBrowserBhistorySerializer(serializers.ModelSerializer):
                 message="已存在"
             )
         ]
-
 
 
 class HotSerializer(serializers.ModelSerializer):

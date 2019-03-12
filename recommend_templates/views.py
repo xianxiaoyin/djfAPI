@@ -11,7 +11,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .serializer import NewsSerializer, ForumSerializer, ForumSerializer2, SmsSerializer, \
     UserRegSerializer, UserFavSerializer, UserDetailSerializer, UserFavDetailSerializer\
     ,UserBrowserBhistorySerializer, LeaveCreateSerializer, LeaveListSerializer,ClassifySerializer,\
-    HotSerializer
+    HotSerializer,UserBrowserBhistorySerializer1
 
 from .filters import NewsFilterSet, ForumFilterSet
 from django.contrib.auth import get_user_model
@@ -336,7 +336,12 @@ class UserBrowserHistoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     添加浏览历史
     """
     filter_backends = (filters.OrderingFilter,)
-    serializer_class = UserBrowserBhistorySerializer
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return UserBrowserBhistorySerializer
+        elif self.action == 'create':
+            return UserBrowserBhistorySerializer1
+        return UserBrowserBhistorySerializer
     # authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     ordering_fields = ('created_at',)
