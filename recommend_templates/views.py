@@ -362,7 +362,7 @@ class UserForumViewSet( mixins.CreateModelMixin, mixins.ListModelMixin, mixins.R
 
     filter_backends = (filters.OrderingFilter,)
     serializer_class = ForumSerializer
-    authentication_classes = (JSONWebTokenAuthentication,)
+    # authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     ordering_fields = ('created_at',)
     ordering = ('-created_at')
