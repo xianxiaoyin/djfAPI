@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import operator
 import math
-from .models import News, Forum, VerifyCode, UserFav, BrowserHistory, Leave, Classify
+from .models import News, Forum, UserFav, BrowserHistory, Leave, Classify, UserProfile
 from rest_framework import mixins, generics, viewsets, filters, permissions
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
@@ -514,10 +514,9 @@ class HotViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     list:
     留言列表 
     """
-    queryset = VerifyCode.objects.all()
 
     def list(self, request, *args, **kwargs):
-        t = Tjsf(2)
+        t = Tjsf(user=UserProfile.objects.get(username=request.user).id)
         b = []
         for i in t.get_all_article():
             a = {}
@@ -527,3 +526,5 @@ class HotViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return Response({'hot': b})
 
     serializer_class = HotSerializer
+    # authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
