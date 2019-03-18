@@ -57,10 +57,11 @@ class UserRegSerializer(serializers.ModelSerializer):
     """
     用户注册序列化类
     """
-    username = serializers.CharField( read_only=True,
-                                     allow_blank=False,
-                                    validators=[UniqueValidator(queryset=User.objects.all(),
-                                                                 message="用于已存在！")])
+    # username = serializers.CharField( read_only=True,
+    #                                  allow_blank=False,
+    #                                 validators=[UniqueValidator(queryset=User.objects.all(),
+    #                                                              message="用于已存在！")])
+    username = serializers.CharField()
     password = serializers.CharField(write_only=True,
         style={'input_type': 'password'}
     )
@@ -74,13 +75,13 @@ class UserRegSerializer(serializers.ModelSerializer):
 
 
 
-    def validate(self, attrs):
-        attrs["username"] = attrs["mobile"]
-        return attrs
+    # def validate(self, attrs):
+    #     attrs["username"] = attrs["mobile"]
+    #     return attrs
 
     class Meta:
         model = User
-        fields = ('username','mobile', 'password')
+        fields = ('username', 'password')
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
