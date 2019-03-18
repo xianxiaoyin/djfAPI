@@ -72,7 +72,7 @@ class UserViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,  mixins.Dest
     """
     # serializer_class = UserRegSerializer
     queryset = User.objects.all()
-    # authentication_classes = (JSONWebTokenAuthentication, )
+    authentication_classes = (JSONWebTokenAuthentication, )
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -280,8 +280,8 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     search_fields = ('title', 'type')
     ordering_fields = ('updated_at',)
     ordering = ('-updated_at')
-    # authentication_classes = (JSONWebTokenAuthentication,)
-    # permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
+    authentication_classes = (JSONWebTokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
 
     def get_permissions(self):
         if self.action == 'create':
@@ -314,7 +314,7 @@ class UserFavViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retr
     删除收藏
     """
     # serializer_class = UserFavSerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
 
 
@@ -347,7 +347,7 @@ class UserBrowserHistoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         elif self.action == 'create':
             return UserBrowserBhistorySerializer1
         return UserBrowserBhistorySerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     ordering_fields = ('created_at',)
     ordering = ('-created_at')
@@ -367,7 +367,7 @@ class UserForumViewSet( mixins.CreateModelMixin, mixins.ListModelMixin, mixins.R
 
     filter_backends = (filters.OrderingFilter,)
     serializer_class = ForumSerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     ordering_fields = ('created_at',)
     ordering = ('-created_at')
@@ -440,7 +440,7 @@ class LeaveViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Crea
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('forum',)
     # serializer_class = LeaveSerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     ordering_fields = ('created_at',)
     ordering = ('-created_at')
@@ -531,5 +531,5 @@ class HotViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return Response({'hot': b})
 
     serializer_class = HotSerializer
-    # authentication_classes = (JSONWebTokenAuthentication,)
+    authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
