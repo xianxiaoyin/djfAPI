@@ -7,8 +7,23 @@ class WXLogin(object):
     def __init__(self):
         self.oauth2_url = 'https://api.weixin.qq.com/sns/oauth2/access_token'
         self.userinfo_url = 'https://api.weixin.qq.com/sns/userinfo'
-        self.appid = 'wxfcb904527f9ed7cd'
-        self.secret = '334c1da0b607550ca0d920cd77b47143'
+        self.code2session = 'https://api.weixin.qq.com/sns/jscode2session'
+        self.appid = 'wxf9b2d303252ea012'
+        self.secret = '47b6dd25f2bd1a35cc0ea36d7f886146'
+
+
+    def get_openid_key(self, code):
+        data = {
+            'appid': self.appid,
+            'secret': self.secret,
+            'js_code': code,
+            'grant_type': 'authorization_code'
+        }
+        html = requests.get(url=self.code2session, params=data)
+        print(html.status_code)
+        print(html.text)
+        if html.status_code == 200:
+            return html.json()
 
     def get_token(self, code):
         data = {

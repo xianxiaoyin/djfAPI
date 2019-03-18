@@ -54,9 +54,9 @@ class SmsCodeViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         try:
             from utils.wxlogin import WXLogin
             wx = WXLogin()
-            data = wx.get_token(serializer.data['code'])
+            data = wx.get_openid_key(serializer.data['code'])
             a = serializer.data
-            a['token'] = data['access_token']
+            a['session_key'] = data['session_key']
             a['openid'] = data['openid']
         except Exception as e:
             print(e)
