@@ -61,10 +61,11 @@ class UserRegSerializer(serializers.ModelSerializer):
     #                                  allow_blank=False,
     #                                 validators=[UniqueValidator(queryset=User.objects.all(),
     #                                                              message="用于已存在！")])
-    username = serializers.CharField()
+    username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True,
         style={'input_type': 'password'}
     )
+
 
 
     # def validate_password(self, password):

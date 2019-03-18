@@ -76,12 +76,17 @@ class UserViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin,  mixins.Dest
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = self.perform_create(serializer)
-        payload = jwt_payload_handler(user)
-        serializer.data["token"] = jwt_encode_handler(payload)
-        serializer.data["name"] = user.nick_name if user.nick_name else user.username
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        try:
+            user = self.perform_create(serializer)
+            payload = jwt_payload_handler(user)
+            serializer.data["token"] = jwt_encode_handler(payload)
+            serializer.data["name"] = user.nick_name if user.nick_name else user.username
+            headers = self.get_success_headers(serializer.data)
+            data = {'msg': 'success'}
+        except:
+            headers = {}
+            data = {'msg': 'fail'}
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
        return serializer.save()
