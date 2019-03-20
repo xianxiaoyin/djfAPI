@@ -188,11 +188,11 @@ class UserBrowserBhistorySerializer1(serializers.ModelSerializer):
     """
 
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+    # created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     # news = NewsSerializer()
     class Meta:
         model = BrowserHistory
-        fields = ('user', 'news', 'created_at')
+        fields = ('user', 'news')
         validators = [
             UniqueTogetherValidator(
                 queryset=BrowserHistory.objects.all(),
