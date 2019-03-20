@@ -465,6 +465,7 @@ class Tjsf(object):
                     self.all_list[j.user_id] += 1
                 else:
                     self.all_list[j.user_id] = 1
+
     # 计算2个用户的相似度
     def Jaccard(self, userA, userB):
         fengmu = math.sqrt(userA * userB)
@@ -474,13 +475,12 @@ class Tjsf(object):
     def get_users(self):
         # 获取用户相似度最高的三个用户的相似度值
         xiangsidu = {}
+        print(self.all_list)
+        print(self.user)
         for k, v in self.all_list.items():
             if k != self.user:
                 # xiangsidu['用户{}对于{}的相似度'.format(self.user, k)] = self.Jaccard(self.all_list[self.user], v)
                 xiangsidu['{},{}'.format(self.user, k)] = self.Jaccard(self.all_list[self.user], v)
-        # return xiangsidu
-        # print(sorted(xiangsidu.items(), key=operator.itemgetter(1), reverse=True))
-        # return sorted(xiangsidu.items(), key=operator.itemgetter(1), reverse=True)[:3]
         return sorted(xiangsidu.keys(), key=operator.itemgetter(1), reverse=True)[:5]
 
     def get_all_users(self):
@@ -531,5 +531,5 @@ class HotViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return Response({'hot': b})
 
     serializer_class = HotSerializer
-    authentication_classes = (JSONWebTokenAuthentication,)
+    # authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
