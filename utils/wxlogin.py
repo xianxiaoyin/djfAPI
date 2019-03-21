@@ -20,8 +20,6 @@ class WXLogin(object):
             'grant_type': 'authorization_code'
         }
         html = requests.get(url=self.code2session, params=data)
-        print(html.status_code)
-        print(html.text)
         if html.status_code == 200:
             return html.json()
 
@@ -33,8 +31,6 @@ class WXLogin(object):
             'grant_type': 'authorization_code'
         }
         html = requests.get(url=self.oauth2_url, params=data)
-        print(html.status_code)
-        print(html.text)
         if html.status_code == 200:
             return html.json()
 
