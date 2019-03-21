@@ -108,7 +108,7 @@ class UserFavSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
         model = UserFav
-        fields = ("user", "news", "id")
+        fields = ("user", "news")
         validators = [
             UniqueTogetherValidator(
                 queryset=UserFav.objects.all(),
@@ -125,7 +125,7 @@ class UserFavDetailSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
         model = UserFav
-        fields = ("user", "news", "id")
+        fields = ("user", "news")
 
 class LeaveCreateSerializer(serializers.ModelSerializer):
     """
@@ -188,8 +188,6 @@ class UserBrowserBhistorySerializer1(serializers.ModelSerializer):
     """
 
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    # created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
-    # news = NewsSerializer()
     class Meta:
         model = BrowserHistory
         fields = ('user', 'news')

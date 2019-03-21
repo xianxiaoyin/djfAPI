@@ -328,6 +328,8 @@ class UserFavViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retr
             return UserFavSerializer
         return UserFavDetailSerializer
 
+    lookup_field = 'news_id'
+
 class UserBrowserHistoryViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
