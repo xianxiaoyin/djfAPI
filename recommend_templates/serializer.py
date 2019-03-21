@@ -125,7 +125,7 @@ class UserFavDetailSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
         model = UserFav
-        fields = ("user", "news")
+        fields = ("user", "news", 'id')
 
 class LeaveCreateSerializer(serializers.ModelSerializer):
     """
