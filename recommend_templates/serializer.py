@@ -167,8 +167,8 @@ class ForumSerializer2(serializers.ModelSerializer):
     updated_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     class Meta:
         model = Forum
-        fields = ('user','title','id', 'updated_at', 'created_at')
-        # fields = "__all__"
+        # fields = ('user','title','id', 'updated_at', 'created_at','type','status')
+        fields = "__all__"
 
 class UserBrowserBhistorySerializer(serializers.ModelSerializer):
     """
