@@ -224,6 +224,7 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     def create(self, request, *args, **kwargs):
             # request.data._mutable = True
             # request.query_params._mutable = True
+            print(request.data)
             t = Translate('uy', 'zh')
             request.data['title'] = t.runs(request.data['title']).replace('<br>','')
             request.data['content'] = t.runs(request.data['content']).replace('<br>','')
