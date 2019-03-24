@@ -222,8 +222,8 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     """
     queryset = Forum.objects.all()
     def create(self, request, *args, **kwargs):
-            request.data._mutable = True
-            request.query_params._mutable = True
+            # request.data._mutable = True
+            # request.query_params._mutable = True
             t = Translate('uy', 'zh')
             request.data['title'] = t.runs(request.data['title']).replace('<br>','')
             request.data['content'] = t.runs(request.data['content']).replace('<br>','')
@@ -280,7 +280,7 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     search_fields = ('title', 'type')
     ordering_fields = ('updated_at',)
     ordering = ('-updated_at')
-    authentication_classes = (JSONWebTokenAuthentication,)
+    # authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,IsOwnerOrReadOnly)
 
     def get_permissions(self):
