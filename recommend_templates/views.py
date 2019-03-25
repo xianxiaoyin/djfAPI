@@ -114,7 +114,7 @@ class PaginationSet(PageNumberPagination):
     """
     新闻分页类
     """
-    page_size = 5
+    page_size = 10
     page_size_query_param = 'page_size'
     page_query_param = 'page'
     max_page_size = 100
@@ -369,7 +369,7 @@ class UserForumViewSet( mixins.CreateModelMixin, mixins.ListModelMixin, mixins.R
 
     filter_backends = (filters.OrderingFilter,)
     serializer_class = ForumSerializer
-    authentication_classes = (JSONWebTokenAuthentication,)
+    # authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     ordering_fields = ('created_at',)
     ordering = ('-created_at')
