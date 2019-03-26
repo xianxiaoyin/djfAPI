@@ -1,6 +1,6 @@
 # coding:utf8
 import requests
-
+from time import sleep
 '''
 将输入的中文翻译成维吾尔文
 '''
@@ -37,6 +37,7 @@ class Translate(object):
         print(html.status_code)
         print(html.text)
         if html.status_code == 200:
+            sleep(1)
             return html.json()['tgt_text']
         else:
             return '翻译故障'
