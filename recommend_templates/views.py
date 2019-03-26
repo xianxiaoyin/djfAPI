@@ -224,9 +224,9 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     def create(self, request, *args, **kwargs):
             # request.data._mutable = True
             # request.query_params._mutable = True
-            t = Translate('uy', 'zh')
-            request.data['title'] = t.runs(request.data['title']).replace('<br>','')
-            request.data['content'] = t.runs(request.data['content']).replace('<br>','')
+            # t = Translate('uy', 'zh')
+            # request.data['title'] = t.runs(request.data['title']).replace('<br>','')
+            # request.data['content'] = t.runs(request.data['content']).replace('<br>','')
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
@@ -259,19 +259,20 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        cfrom = self.request.query_params.get('cfrom', None)
-        to = self.request.query_params.get('to', None)
-        if cfrom is not None and to is not None:
-            try:
-                data = serializer.data
-                t = Translate(cfrom, to)
-                data['title'] = t.runs(data['title'])
-                data['content'] = t.runs(data['content'])
-                return Response(data)
-            except:
-                pass
-        else:
-            return Response(serializer.data)
+        # cfrom = self.request.query_params.get('cfrom', None)
+        # to = self.request.query_params.get('to', None)
+        # if cfrom is not None and to is not None:
+        #     try:
+        #         data = serializer.data
+        #         t = Translate(cfrom, to)
+        #         data['title'] = t.runs(data['title'])
+        #         data['content'] = t.runs(data['content'])
+        #         return Response(data)
+        #     except:
+        #         pass
+        # else:
+        #     return Response(serializer.data)
+        return Response(serializer.data)
     serializer_class = ForumSerializer
     pagination_class = PaginationSet
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
