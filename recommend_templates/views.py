@@ -114,7 +114,7 @@ class PaginationSet(PageNumberPagination):
     """
     新闻分页类
     """
-    page_size = 30
+    page_size = 8
     page_size_query_param = 'page_size'
     page_query_param = 'page'
     max_page_size = 100
