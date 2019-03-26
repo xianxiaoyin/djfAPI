@@ -1,5 +1,4 @@
 # coding:utf8
-
 import requests
 
 '''
@@ -29,9 +28,12 @@ class Translate(object):
             'src_text': content,
             'from': self.cfrom,
             'to': self.to,
-            'url': '2',
+            'url': 2,
         }
-        html = requests.post(url=self.url, data=data)
+        headers = {
+            "Referer": "http://www.mzywfy.org.cn/translate.jsp",
+        }
+        html = requests.post(url=self.url, data=data, headers=headers)
         print(html.status_code)
         print(html.text)
         if html.status_code == 200:
@@ -40,10 +42,8 @@ class Translate(object):
             return '翻译故障'
 
 if __name__ == '__main__':
-    # a = Translate('zh', 'uy')
-    a = Translate('uy', 'zh')
-    mystr = """   
-    我爱我家
-     """
+    a = Translate('zh', 'uy')
+    # a = Translate('uy', 'zh')
+    mystr = """我是谁"""
     print(a.runs(mystr))
 
