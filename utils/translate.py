@@ -38,7 +38,7 @@ class Translate(object):
         print(html.text)
         if html.status_code == 200:
             sleep(1)
-            return html.json()['tgt_text']
+            return html.json()['tgt_text'].replace('<br>','')
         else:
             return '翻译故障'
 
