@@ -299,8 +299,9 @@ class ForumViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
         return ForumSerializer2
 
 
-class UserFavViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                   mixins.DestroyModelMixin, viewsets.GenericViewSet):
+# class UserFavViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                   # mixins.DestroyModelMixin,viewsets.GenericViewSet):
+class UserFavViewSet(viewsets.ModelViewSet):
     """
     list:
     收藏列表 
@@ -318,6 +319,8 @@ class UserFavViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retr
     # authentication_classes = (JSONWebTokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
 
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
     def get_queryset(self):
         return UserFav.objects.filter(user_id=self.request.user)
